@@ -15,7 +15,7 @@ package shapeless;
 
 trait HList;
 
-final case class ::[H, T](head : H, tail : T) extends HList {
+final case class ::[+H, +T](head : H, tail : T) extends HList {
   def ::[H](h : H) = shapeless.::(h, this);
   override def toString() = head.toString()+" :: "+tail.toString()
 }
@@ -27,22 +27,23 @@ sealed trait HNil extends HList {
 
 object HNil extends HNil;
 
-abstract class Ops[L, M] {
-  type Out;
-  def revPref(m: M): Out
+trait Reverse[L, M, Out] {
+  def revAcc(m: M): Out;
 }
 
 object HList {
-  def view[M](l: HNil) = new Ops[HNil, M] {
-    type Out = M;
-    def revPref(m: M): Out = m
-  }
+  def view[M](l: HNil):
+    Reverse[HNil, M, M] =
+      new Reverse[HNil, M, M] {
+        def revAcc(m: M): M = m
+      }
 
-  def view[H, M, T <% Ops[T, ::[H, M]]](l: ::[H, T]): Ops[::[H, T], M] = new Ops[::[H, T], M] {
-    val tlOps: Ops[T, ::[H, M]] = l.tail;
-    type Out = tlOps.Out;
-    def revPref(m: M): Out = tlOps.revPref(::(l.head, m))
-  }
+  def view[H, M, T <% Reverse[T, ::[H, M], Out], Out](l: ::[H, T]):
+    Reverse[::[H, T], M, Out] =
+      new Reverse[::[H, T], M, Out] {
+        val tlReverse: Reverse[T, ::[H, M], Out] = l.tail;
+        def revAcc(m: M): Out = tlReverse.revAcc(::(l.head, m))
+      }
 }
 
 object Demo {
@@ -56,9 +57,10 @@ object Demo {
     typed[ISB](l);
     System.out.println(l);
 
-    val ops: Ops[ISB, HNil] = l;
-    val m = ops.revPref(HNil);
-    //typed[BSI](m);
-    System.out.println(m)
+    val ops: Reverse[ISB, HNil, BSI] = l;
+    val m = ops.revAcc(HNil);
+    //val m = l.revAcc(HNil);
+    typed[BSI](m);
+    System.out.println(m);
   }
 }
