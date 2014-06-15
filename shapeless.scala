@@ -12,6 +12,8 @@ package shapeless;
 // Can't have both view bounds and upper bounds
 // Type members with type args can't be abstract
 // error is in Predef
+// view instances are unnamed in view using method signatures so member types can't be referenced
+// no-dependent method types
 
 trait HList;
 
