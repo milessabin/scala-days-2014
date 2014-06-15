@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -Rf target/classes/*
+mkdir -p target/classes
+
+scala-1.3.0.2/bin/scalac -d target/classes $*
