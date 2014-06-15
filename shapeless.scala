@@ -7,6 +7,8 @@ package shapeless;
 // No infix constuctors
 // In the REPL package prefix required for :: (to override scala.::) and (more
 // weirdly HNil) irrespective of imports
+// No tuple syntax
+// Views apply to single values
 
 trait HList;
 
